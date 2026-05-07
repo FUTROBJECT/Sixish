@@ -283,6 +283,67 @@
     font-style: italic;
     color: #444;
   }
+  /* iPhone-frame screenshot embeds */
+  .phone-figure {
+    margin: 24px auto;
+    text-align: center;
+    max-width: 320px;
+  }
+  .phone-frame {
+    display: inline-block;
+    background: #111;
+    padding: 6px;
+    border-radius: 36px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.08), inset 0 0 0 1px #2a2a2a;
+    position: relative;
+  }
+  .phone-frame::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 22px;
+    background: #111;
+    border-radius: 12px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .phone-frame img {
+    display: block;
+    width: 240px;
+    border-radius: 30px;
+    background: #fff;
+  }
+  .phone-figure figcaption {
+    font-size: 9.5pt;
+    color: #555;
+    text-align: left;
+    margin: 12px 4px 0 4px;
+    line-height: 1.45;
+  }
+  .phone-figure figcaption .caption-label {
+    display: block;
+    font-weight: bold;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #888;
+    margin-bottom: 3px;
+  }
+  .phone-row {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin: 28px 0;
+  }
+  .phone-row .phone-figure {
+    margin: 0;
+    flex: 0 0 auto;
+  }
   @media print {
     body { padding: 0.5in; }
     .tab-nav { display: none; }
@@ -414,6 +475,14 @@
   <strong>The short version.</strong> Sixish assembles a layered description of who the household is, what tonight looks like, and what's recently happened, and feeds that to a large language model with structured-output instructions. The architectural work is mostly <em>not</em> in the model call itself &mdash; it's in how the description gets assembled, how new facts get added to it through use, and how the system keeps its voice consistent across surfaces.
 </div>
 
+<figure class="phone-figure">
+  <div class="phone-frame"><img src="assets/screenshots/01-home.png" alt="Sixish home screen showing the title, contextual line (Thursday May 7, 61 degrees and clear, Tower Grove South, last cooked 2 days ago), six tile options, and a freeform input."></div>
+  <figcaption>
+    <span class="caption-label">The home screen</span>
+    The contextual line under the title &mdash; <em>Thursday, May 7 &middot; 61&deg; and clear &middot; Tower Grove South &middot; last cooked 2 days ago</em> &mdash; is the visible surface of Layer 4 (per-night observations). Six tiles plus the freeform input are the entry points to the recommendation flow.
+  </figcaption>
+</figure>
+
 <p>A second commitment, less visible in the day-to-day product but increasingly central to how the architecture is evolving: the system is designed to keep the cook's own situational-matching faculty alive over time, rather than quietly replacing it. This is the maintenance-threat dimension explored at length in the modes section near the end of this document. It shapes choices throughout &mdash; including some that look at first like ordinary product decisions.</p>
 
 <div class="toc">
@@ -462,6 +531,14 @@
   <p>The ephemeral state for tonight specifically. Today's date and day of week, current weather (one API call to Open-Meteo, cached per session), location-anchored facts (whether the local farmers market is open today), the last few nights' cooked dishes from the night log, what the user just typed or which tile they tapped. Recomputed every session.</p>
 </div>
 
+<figure class="phone-figure">
+  <div class="phone-frame"><img src="assets/screenshots/02-leftover-recommendation.png" alt="Recommendation screen showing 'carne asada street taco leftovers' with an EAT WHAT'S ALREADY COOKED badge and an explanation referencing Tuesday's carne asada cooked for 6, with three portions likely sitting in the fridge."></div>
+  <figcaption>
+    <span class="caption-label">Layer 4 in action</span>
+    A leftover-aware recommendation, surfaced because last night's <code>portionsCooked</code> exceeded household size. The most-ephemeral layer (the night log entry from two days ago) is the hinge here &mdash; it shapes today's recommendation without needing to be a configured boundary or a ratified pattern.
+  </figcaption>
+</figure>
+
 <p>Every recommendation prompt is the concatenation of these four layers, in this order. The ordering matters: most-stable facts come first so they frame the model's reading of more-ephemeral context, not the other way around.</p>
 
 <h2 id="sec-flow">2. The recommendation flow, end to end</h2>
@@ -477,6 +554,14 @@
   <li>The response is parsed, validated, and returned to the client.</li>
   <li>The client renders the recommendation. If the user taps "I'm cooking this," the night gets logged with the recommendation's <code>expectedPortions</code> (so leftover detection works on subsequent nights) and the full recipe block (so the night becomes recoverable later). If the user taps "show me another," the rejected recommendation's name gets added to a session-only blocked list and the request goes back, with the new constraint included.</li>
 </ol>
+
+<figure class="phone-figure">
+  <div class="phone-frame"><img src="assets/screenshots/03-reading-the-room.png" alt="Loading screen with the user's tile selection 'Got time, want to cook' shown above a card reading 'Reading the room...'"></div>
+  <figcaption>
+    <span class="caption-label">Step 5 in flight</span>
+    The user has tapped <em class="spoken">Got time, want to cook</em>; the server has assembled the four-layer prompt and called Anthropic's API. The loading copy is itself a small voice surface &mdash; <em class="spoken">reading the room</em>, not <em>processing</em> or <em>thinking</em>.
+  </figcaption>
+</figure>
 
 <div class="highlight-box">
 The recommendation is <em>one</em> dish, not a list. This is a deliberate architectural constraint: the model is being asked to read the situation and make a call, not to surface options. Multiple options would shift the work of deciding back onto the household, which is exactly what the product is trying to relieve.
@@ -504,6 +589,14 @@ The recommendation is <em>one</em> dish, not a list. This is a deliberate archit
 
 <h3>Why the night log stores the recipe</h3>
 <p>Before recovery, the night log captured dish name, date, day of week, household size, and portions &mdash; enough for leftover detection and pattern detection but not enough for recovery, since regenerating "the same" recipe would actually produce a <em>similar</em> recipe and that gap matters when the cook is trying to recreate a specific night. The recipe is now persisted alongside the existing fields when "I'm cooking this" is tapped. Old entries without the field are gracefully unrecoverable &mdash; if the matcher returns an <code>entryDate</code> for an entry that predates the change, the client converts the response to "found the entry but didn't store the recipe back then" rather than fabricating one.</p>
+
+<figure class="phone-figure">
+  <div class="phone-frame"><img src="assets/screenshots/05-recipe-view.png" alt="Recipe view for butter chicken masala showing the marinade and sauce ingredient lists."></div>
+  <figcaption>
+    <span class="caption-label">What gets persisted</span>
+    The full recipe block is stored to <code>sixish:nightLog</code> when the user taps <em class="spoken">I'm cooking this</em>. This is the field that makes a specific night recoverable later &mdash; not a regenerated <em>similar</em> recipe, but the exact one the cook was rendered.
+  </figcaption>
+</figure>
 
 <h3>What recovery is not</h3>
 <p>No favorites, no stars, no marked-as-loved. The night log captures <em>what was cooked</em>, not <em>what was preferred</em>. No filters, tags, or searchable database UI &mdash; the freeform input is the search interface. No meal-planning use of recovered meals. No content layer (notes, photos, ratings). The architectural commitment is that recovery is a way for the cook to ask a specific question about their own history, not a doorway into the system aggregating that history into preferences. The same household-as-controller principle that governs refusals governs recovery: the cook's history is <em>theirs</em>, queryable on demand, never converted into a model of them.</p>
@@ -542,6 +635,14 @@ The key constraint: at most one ratification prompt per session. If multiple can
 - Jack with Tyler for tutoring, until 5pm</pre>
 
 <p>The model is instructed to treat these as constraints just like configured boundaries. The recommendation's <code>whyItFits</code> line then references the pattern specifically &mdash; <em class="spoken">5:30 dinner makes sense, Tyler wraps at 5</em> &mdash; closing the loop. A fact the household typed three Tuesdays ago, ratified once, has now reshaped how the system reasons about Tuesdays.</p>
+
+<figure class="phone-figure">
+  <div class="phone-frame"><img src="assets/screenshots/04-recommendation-result.png" alt="Recommendation card for 'butter chicken masala' with a why-it-fits paragraph that says: Liz gets home around 18:30 and Jack's back from drama by 18:00, so you have the kind of weekend-energy cook that fits when there's real time at the stove, and you haven't touched it recently."></div>
+  <figcaption>
+    <span class="caption-label">The loop closing</span>
+    <code>whyItFits</code> referencing ratified observations directly &mdash; <em class="spoken">Liz gets home around 18:30 and Jack's back from drama by 18:00</em>. Patterns the household confirmed once through after-cook ratification are now reshaping how the system reasons about this specific evening.
+  </figcaption>
+</figure>
 
 <div class="highlight-box">
 <strong>The architectural property being demonstrated:</strong> emergent boundaries can flow back through the system and shape future recommendations in a way the household actually feels. The household profile grows itself through use. No retraining, no fine-tuning, no learned model &mdash; just structured state, accumulated through a single ratification gesture per pattern.
