@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sixish &mdash; How today shapes tonight</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    max-width: 8.5in;
+    margin: 0 auto;
+    padding: 1in;
+    color: #333;
+  }
+  h1 {
+    font-size: 18pt;
+    border-bottom: 2px solid #333;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+  h2 {
+    font-size: 14pt;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 6px;
+    margin-top: 28px;
+  }
+  h3 {
+    font-size: 12pt;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+    margin-top: 20px;
+  }
+  h4 {
+    font-size: 11pt;
+    color: #444;
+    margin-top: 14px;
+    margin-bottom: 6px;
+  }
+  .metadata {
+    color: #666;
+    font-size: 10pt;
+  }
+  .subtitle {
+    font-size: 14pt;
+    color: #666;
+    margin-top: -8px;
+  }
+  .callout {
+    background: #e7f3ff;
+    border-left: 4px solid #0066cc;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  .critical {
+    background: #f8d7da;
+    border-left: 4px solid #c00;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  .success {
+    background: #d4edda;
+    border-left: 4px solid #28a745;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  .highlight-box {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 24px 0;
+  }
+  ul, ol {
+    margin: 8px 0;
+    padding-left: 24px;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+  code {
+    background: #f4f4f4;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10pt;
+  }
+  /* Tab navigation */
+  .tab-nav {
+    display: flex;
+    border-bottom: 2px solid #0066cc;
+    margin: 24px 0 0 0;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    cursor: pointer;
+    font-size: 10pt;
+    font-weight: bold;
+    color: #555;
+    border-radius: 4px 4px 0 0;
+    transition: background 0.2s;
+  }
+  .tab-btn:hover {
+    background: #e0e0e0;
+  }
+  .tab-btn.active {
+    background: #0066cc;
+    color: white;
+    border-color: #0066cc;
+  }
+  .tab-panel {
+    display: none;
+    padding: 4px 0 0 0;
+  }
+  .tab-panel.active {
+    display: block;
+  }
+  /* Marketing-tab hero treatment */
+  .hero {
+    text-align: left;
+    margin: 40px 0 32px 0;
+    padding: 28px 0 24px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+  }
+  .hero-name {
+    font-size: 32pt;
+    font-weight: bold;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px 0;
+    color: #222;
+  }
+  .hero-name sup,
+  h1 sup {
+    font-size: 0.4em;
+    font-weight: 600;
+    vertical-align: super;
+    letter-spacing: 0;
+    margin-left: 1px;
+  }
+  .hero-tagline {
+    font-size: 14pt;
+    font-style: italic;
+    color: #555;
+    margin: 0;
+  }
+  .lead {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #222;
+    margin-top: 18px;
+  }
+  .closing {
+    text-align: left;
+    font-style: italic;
+    font-size: 13pt;
+    color: #444;
+    margin: 32px 0 16px 0;
+  }
+  .idea-block {
+    border-left: 4px solid #0066cc;
+    background: #f8fbff;
+    padding: 14px 18px;
+    margin: 16px 0;
+  }
+  .idea-block .idea-title {
+    font-style: italic;
+    font-weight: bold;
+    color: #0a3a6b;
+    margin-bottom: 6px;
+  }
+  .diff-card {
+    border: 1px solid #ddd;
+    border-left: 4px solid #28a745;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+  }
+  .diff-card .diff-title {
+    font-style: italic;
+    font-weight: bold;
+    color: #155724;
+    margin-bottom: 4px;
+    font-size: 10.5pt;
+  }
+  .diff-card p {
+    margin: 4px 0;
+    font-size: 10pt;
+  }
+  .nogo-card {
+    border: 1px solid #ddd;
+    border-left: 4px solid #c00;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 10pt;
+  }
+  .nogo-card strong {
+    color: #c00;
+  }
+  /* Technical-tab section TOC */
+  .toc {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 14px 20px;
+    margin: 16px 0 24px 0;
+    font-size: 10pt;
+  }
+  .toc-title {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 9pt;
+  }
+  .toc ol {
+    columns: 2;
+    column-gap: 28px;
+    margin: 0;
+    padding-left: 22px;
+  }
+  .toc li {
+    margin-bottom: 3px;
+    break-inside: avoid;
+  }
+  .toc a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+  .toc a:hover {
+    text-decoration: underline;
+  }
+  .layer-card {
+    border: 1px solid #ddd;
+    border-left: 5px solid #0066cc;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    background: #fafbfd;
+  }
+  .layer-card h4 {
+    margin: 0 0 6px 0;
+    color: #0a3a6b;
+  }
+  .layer-card p {
+    margin: 4px 0;
+    font-size: 10.5pt;
+  }
+  .mode-card {
+    border: 1px solid #ddd;
+    border-left: 4px solid #856404;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    background: #fffdf6;
+  }
+  .mode-card h4 {
+    margin: 0 0 6px 0;
+    color: #5a4500;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    letter-spacing: 0.05em;
+  }
+  .mode-card p {
+    margin: 4px 0;
+    font-size: 10.5pt;
+  }
+  em.spoken {
+    font-style: italic;
+    color: #444;
+  }
+  @media print {
+    body { padding: 0.5in; }
+    .tab-nav { display: none; }
+    .tab-panel { display: block !important; page-break-before: always; }
+    .tab-panel:first-of-type { page-break-before: avoid; }
+    .toc ol { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="logo-container" style="display: flex; align-items: flex-end; margin-bottom: 20px;">
+  <svg id="FO_Logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 172.97 142.95" style="width: 80px; height: auto;">
+    <defs>
+      <style>
+        .cls-1 {
+          font-family: Switzer-SemiboldItalic, Switzer, Arial, sans-serif;
+          font-size: 130.25px;
+          font-style: italic;
+          font-weight: 600;
+        }
+        .cls-2 { letter-spacing: -.02em; }
+        .cls-3 { letter-spacing: -.04em; }
+      </style>
+    </defs>
+    <text class="cls-1" transform="translate(0 112.21)"><tspan class="cls-3" x="0" y="0">F</tspan><tspan class="cls-2" x="70.47" y="0">O</tspan></text>
+  </svg>
+  <span style="font-family: Arial, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #333; margin-left: 4px; padding-bottom: 12px;">DESIGN</span>
+</div>
+
+<h1>Sixish<sup>&trade;</sup></h1>
+<p class="subtitle">How today shapes tonight &mdash; one-pager and technical explainer</p>
+
+<p class="metadata">
+<strong>Project:</strong> Sixish &mdash; a small, attentive presence in the dinner decision<br>
+<strong>Document type:</strong> Combined brand one-pager + architectural deep-dive<br>
+<strong>Sources:</strong> <code>sixish-onepager_v2</code>, <code>sixish-technical-explainer (2)</code>
+</p>
+
+<!-- TAB NAVIGATION -->
+<div class="tab-nav">
+  <div class="tab-btn active" onclick="switchTab('onepager')">One-Pager</div>
+  <div class="tab-btn" onclick="switchTab('technical')">Technical Explainer</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 1: ONE-PAGER -->
+<!-- ============================================================ -->
+<div class="tab-panel active" id="tab-onepager">
+
+<div class="hero">
+  <div class="hero-name">Sixish<sup>&trade;</sup></div>
+  <p class="hero-tagline">How today shapes tonight.</p>
+</div>
+
+<p class="lead">Sixish is a cooking app for households that already know how to cook.</p>
+
+<p>Not a recipe search engine. Not a meal planner. Not a discovery feed.</p>
+
+<p>A small, attentive presence in the dinner decision &mdash; the part of the day where someone has to figure out what to feed everyone, given who's home, how the day went, what's around, and what kind of energy is left.</p>
+
+<p>You answer a single question &mdash; <em>what is tonight like?</em> &mdash; by tapping a tile or typing a sentence. Sixish reads the situation (day, weather, what's local, whether last night's dinner made enough for tonight, what your household has told it about itself) and offers one recommendation, with a real reason it fits. Sometimes the right answer is <em class="spoken">any orzo left?</em> &mdash; the leftover that's already in the fridge, not a new dish to cook. Sometimes it's a 25-minute weeknight meal. Either way, one recommendation. Not ten. Take it or leave it.</p>
+
+<h2>Two big ideas</h2>
+
+<div class="idea-block">
+  <div class="idea-title">Decision fatigue around dinner is a translation problem, not a search problem.</div>
+  <p>The household already knows what tonight is like; they don't have an easy way to turn that knowing into "okay, here's what we're making." Sixish is the translator.</p>
+</div>
+
+<div class="idea-block">
+  <div class="idea-title">A cooking app worth using should take responsibility for the relationship it has with the cook and family over time.</div>
+  <p>Every tool that helps you decide tonight is, over time, also doing something to your ability to decide without it. Sixish helps on the nights you want help and gets out of the way on the nights you don't. The getting-out-of-the-way is part of the product, not an accident &mdash; it protects your continued capacity to cook unaided, which we think is worth protecting. What capability looks like is up to you. Putting stuff together and reheating count; the matching skill that says <em class="spoken">we have eggs, the kale's going, here's what works</em> is real cognitive work even when no recipe is involved.</p>
+</div>
+
+<h2>What makes Sixish different</h2>
+
+<div class="diff-card">
+  <div class="diff-title">The household is the controller, not the subject.</div>
+  <p>Refusals are constraints, not preference signals. The system doesn't model you; it listens to you.</p>
+</div>
+
+<div class="diff-card">
+  <div class="diff-title">The system has a voice.</div>
+  <p>Observational, present, brief. Uses your family's names. References specific things you actually have. Asks questions when it doesn't know &mdash; <em class="spoken">any orzo left?</em> &mdash; rather than asserting facts it can't see.</p>
+</div>
+
+<div class="diff-card">
+  <div class="diff-title">Local context is part of the meal.</div>
+  <p>Cooking has always been local; cooking apps have always been the opposite. The longer goal is community-grounded culinary knowledge specific to where you live, built as a commons rather than a marketplace &mdash; no paid placements, no sponsored recommendations.</p>
+</div>
+
+<div class="diff-card">
+  <div class="diff-title">The system gets out of the way when asked.</div>
+  <p>Sixish has a quiet mode where it does almost nothing, because some nights are for cooking without help and the architecture is built to make space for that.</p>
+</div>
+
+<h2>Who Sixish is for</h2>
+
+<p>Households where someone is already the cook, and the problem isn't recipes &mdash; it's deciding. Households with rhythms (kids' activities, partners' shifts). Cooks who improvise more than they plan. People who'd rather have a tool that can be quiet than a tool that always insists on being useful. Anyone tired of opening a recipe app, scrolling through twenty trending suggestions, closing it, and making grilled cheese.</p>
+
+<div class="nogo-card">
+  <strong>Not for:</strong> people who want endless options, treat meal-planning as a hobby, or want a feed of cooking content.
+</div>
+
+<h2>The why</h2>
+
+<p>Cooking dinner is one of the most repeated human acts &mdash; about fifteen thousand decisions over a cooking life. Across that many decisions, the cook's capability either stays alive or quietly fades depending on what kind of help they accept along the way. Sixish is built to help with deciding on the nights that's what you want, without quietly making you worse at deciding when you don't.</p>
+
+<p>A small, attentive presence in the dinner decision. Quiet when you want quiet.</p>
+
+<p class="closing">How today shapes tonight.</p>
+
+</div>
+<!-- END TAB 1 -->
+
+
+<!-- ============================================================ -->
+<!-- TAB 2: TECHNICAL EXPLAINER -->
+<!-- ============================================================ -->
+<div class="tab-panel" id="tab-technical">
+
+<h1 style="margin-top: 18px;">How Sixish works</h1>
+<p class="subtitle">A technical explainer &mdash; what's actually happening when you tap a tile and a recommendation comes back.</p>
+
+<p>Written for engineers, product people, and curious users who want to understand the architecture under the hood. No marketing language. No black-box hand-waving.</p>
+
+<div class="callout">
+  <strong>The short version.</strong> Sixish assembles a layered description of who the household is, what tonight looks like, and what's recently happened, and feeds that to a large language model with structured-output instructions. The architectural work is mostly <em>not</em> in the model call itself &mdash; it's in how the description gets assembled, how new facts get added to it through use, and how the system keeps its voice consistent across surfaces.
+</div>
+
+<p>A second commitment, less visible in the day-to-day product but increasingly central to how the architecture is evolving: the system is designed to keep the cook's own situational-matching faculty alive over time, rather than quietly replacing it. This is the maintenance-threat dimension explored at length in the modes section near the end of this document. It shapes choices throughout &mdash; including some that look at first like ordinary product decisions.</p>
+
+<div class="toc">
+  <div class="toc-title">In this document</div>
+  <ol>
+    <li><a href="#sec-layers">The architecture as a system of layers</a></li>
+    <li><a href="#sec-flow">The recommendation flow, end to end</a></li>
+    <li><a href="#sec-refusals">How refusals work</a></li>
+    <li><a href="#sec-recovery">Recipe recovery</a></li>
+    <li><a href="#sec-loop">The boundary loop</a></li>
+    <li><a href="#sec-voice-surfaces">The two voice surfaces</a></li>
+    <li><a href="#sec-voice-consistency">Voice consistency</a></li>
+    <li><a href="#sec-ask-assert">The ask-vs-assert principle</a></li>
+    <li><a href="#sec-degradation">Graceful degradation</a></li>
+    <li><a href="#sec-storage">Storage and persistence</a></li>
+    <li><a href="#sec-model">The model integration</a></li>
+    <li><a href="#sec-validation">Validation and testing</a></li>
+    <li><a href="#sec-not-doing">What the architecture is <em>not</em> doing</a></li>
+    <li><a href="#sec-modes">Modes: protecting matching faculty</a></li>
+    <li><a href="#sec-future">Where the architecture is heading</a></li>
+    <li><a href="#sec-bet">The architectural bet, restated</a></li>
+  </ol>
+</div>
+
+<h2 id="sec-layers">1. The architecture as a system of layers</h2>
+
+<p>Sixish's state lives in four layers, ordered from most stable to most ephemeral. Every recommendation reads from all four, with the layers feeding into the prompt in stability order.</p>
+
+<div class="layer-card">
+  <h4>Layer 1: Configured boundaries</h4>
+  <p>Hard rules captured once, treated as immutable. Allergies, foods someone in the house won't eat, equipment, household composition, recurring schedules (a partner's work rotation, a kid's school activities with end-of-season dates), location, weekly shop rhythm. These are facts, not preferences. They're stored as a constants file in v0; eventually they're captured through a brief onboarding conversation. The system treats them as constraints to be honored absolutely, never as suggestions to be balanced against other factors.</p>
+</div>
+
+<div class="layer-card">
+  <h4>Layer 2: Culinary anchors</h4>
+  <p>A small set of dishes the household specifically named when asked targeted questions: a meal everyone likes, a meal made when the cook is tired, a meal cooked on weekends with time, optionally a comfort meal. Each anchor is a (role, dish) pair where the dish is whatever the household calls it &mdash; <em class="spoken">the chicken with the lemons</em>, <em class="spoken">Liz's chickpea curry</em> &mdash; stored as freeform text, never normalized into structured fields. Anchors aren't preferences and aren't constraints; they're orienting data. They tell the system what techniques the cook is comfortable with, what ingredients are kept around, what the household's actual repertoire looks like. The model reads meaning from the dish names directly rather than extracting tags.</p>
+</div>
+
+<div class="layer-card">
+  <h4>Layer 3: Ratified observations</h4>
+  <p>Patterns the household has confirmed through use. The detection layer (described below) watches the stream of nightly observations and proposes candidates; the household ratifies or dismisses each one through a quiet question. Ratified patterns include a day-of-week, an optional time estimate, a description, and an optional expiration date. They live in localStorage and feed into the recommendation prompt the same way configured boundaries do &mdash; but they emerged through use rather than configuration, which makes them the architecturally interesting layer.</p>
+</div>
+
+<div class="layer-card">
+  <h4>Layer 4: Per-night observations</h4>
+  <p>The ephemeral state for tonight specifically. Today's date and day of week, current weather (one API call to Open-Meteo, cached per session), location-anchored facts (whether the local farmers market is open today), the last few nights' cooked dishes from the night log, what the user just typed or which tile they tapped. Recomputed every session.</p>
+</div>
+
+<p>Every recommendation prompt is the concatenation of these four layers, in this order. The ordering matters: most-stable facts come first so they frame the model's reading of more-ephemeral context, not the other way around.</p>
+
+<h2 id="sec-flow">2. The recommendation flow, end to end</h2>
+
+<p>When the user taps a tile or submits a sentence:</p>
+
+<ol>
+  <li>The client gathers per-night state from localStorage and derived sources &mdash; recent night logs, weekly notes from any Sunday check-in responses, a list of any recommendations the user has rejected this session.</li>
+  <li>For freeform input, the client first calls <code>/api/parse-recovery</code> to classify whether the cook is asking about a meal they already made (recovery) or proposing a fresh situational input. Tile inputs skip this step &mdash; tile labels are statically forward-looking, so the classifier call is unnecessary. If recovery is detected, the flow branches to the recovery path described in its own section below.</li>
+  <li>For forward-looking input, the client posts to <code>/api/recommend</code> with the gathered state plus the tile or freeform text. The request includes headers carrying the client's local date (so server-side timezone differences don't break day-of-week derivation) and, if dev mode is on, an optional date-override header.</li>
+  <li>The server reads its share of the state &mdash; configured boundaries, anchors &mdash; and assembles the full prompt. The system prompt contains the layered description, voice rules, and an output schema. The user message contains tonight's specifics.</li>
+  <li>The server calls Anthropic's API with structured-output instructions, requesting JSON matching a fixed schema: <code>{ name, whyItFits, timeEstimateMinutes, expectedPortions, isLeftoverOption, recipe }</code>.</li>
+  <li>The response is parsed, validated, and returned to the client.</li>
+  <li>The client renders the recommendation. If the user taps "I'm cooking this," the night gets logged with the recommendation's <code>expectedPortions</code> (so leftover detection works on subsequent nights) and the full recipe block (so the night becomes recoverable later). If the user taps "show me another," the rejected recommendation's name gets added to a session-only blocked list and the request goes back, with the new constraint included.</li>
+</ol>
+
+<div class="highlight-box">
+The recommendation is <em>one</em> dish, not a list. This is a deliberate architectural constraint: the model is being asked to read the situation and make a call, not to surface options. Multiple options would shift the work of deciding back onto the household, which is exactly what the product is trying to relieve.
+</div>
+
+<h2 id="sec-refusals">3. How refusals work</h2>
+
+<p>When the user rejects a recommendation by tapping "show me another," the rejected recommendation gets added to a <code>blockedRecommendations</code> array that's sent on subsequent requests in the same session. The model is told explicitly: <em>these have been declined for tonight; do not suggest them again or suggest near-variants. The household is asking for something meaningfully different.</em></p>
+
+<p>This is a small architectural choice with significant downstream consequences. Most recommendation systems treat user rejections as soft preference signals &mdash; accumulated over time, fed into a model that learns "this user doesn't like X." Sixish doesn't. A rejection is a constraint on the current session, full stop. It binds the next recommendation, then expires when the session ends. The household's "no" isn't being mined for future personalization; it's being honored in the moment.</p>
+
+<p>The reason this matters: preference-aggregation models tend to drift toward what they think you want, and when they get it wrong, they keep getting it wrong in the same way. A constraint-based refusal model gets it right <em>or</em> you tell it again, with no accumulated baggage. The household stays in control of the recommendation in a way that aggregation models can't match.</p>
+
+<h2 id="sec-recovery">4. Recipe recovery: the cook's history as a queryable surface</h2>
+
+<p>A late v0 addition that's worth describing in detail because it carries a real architectural commitment. The cook can ask about a meal they made recently &mdash; <em class="spoken">that chicken from last week</em>, <em class="spoken">what did I cook Tuesday</em> &mdash; and get the recipe back. The mechanism deliberately avoids becoming an archive, a favorites list, or a browsing surface.</p>
+
+<h3>Where it lives</h3>
+<p>Recovery has no top-level surface. There is no "history" tab, no "past recipes" view, no infinite scroll of previous meals. Recovery happens <em>through</em> the existing freeform input, parsed as a different kind of query and routed differently. The home screen does not change; the cook simply asks about a past meal in their own language and the system responds.</p>
+
+<h3>How the routing works</h3>
+<p>The freeform input always passes through <code>/api/parse-recovery</code> first, which classifies the input as recovery-or-not and extracts a hint describing what the cook is asking about. The classifier defaults to <em>forward-looking</em> on ambiguity &mdash; the asymmetry of error costs favors it. A missed recovery costs the cook one extra step (re-ask more specifically); a false-recovery on a forward-looking query costs a confusing screen and a back-tap. Lean toward the cheaper-to-recover-from action when uncertain.</p>
+
+<p>If recovery is detected, the client calls <code>/api/recover-recipe</code> with the hint and a compact summary of the last 28 days of night-log entries (just dish names and dates &mdash; the recipe text never crosses the network for recovery). The matcher returns one of three shapes: <strong>match</strong> (with an <code>entryDate</code> the client uses to look up the full stored recipe locally), <strong>clarify</strong> (a question with tappable options when multiple entries plausibly fit), or <strong>none</strong> (an in-voice acknowledgment that no plausible match exists in the searched window). The matcher prompt is explicit that the model must not invent recipes the cook didn't cook.</p>
+
+<h3>Why the night log stores the recipe</h3>
+<p>Before recovery, the night log captured dish name, date, day of week, household size, and portions &mdash; enough for leftover detection and pattern detection but not enough for recovery, since regenerating "the same" recipe would actually produce a <em>similar</em> recipe and that gap matters when the cook is trying to recreate a specific night. The recipe is now persisted alongside the existing fields when "I'm cooking this" is tapped. Old entries without the field are gracefully unrecoverable &mdash; if the matcher returns an <code>entryDate</code> for an entry that predates the change, the client converts the response to "found the entry but didn't store the recipe back then" rather than fabricating one.</p>
+
+<h3>What recovery is not</h3>
+<p>No favorites, no stars, no marked-as-loved. The night log captures <em>what was cooked</em>, not <em>what was preferred</em>. No filters, tags, or searchable database UI &mdash; the freeform input is the search interface. No meal-planning use of recovered meals. No content layer (notes, photos, ratings). The architectural commitment is that recovery is a way for the cook to ask a specific question about their own history, not a doorway into the system aggregating that history into preferences. The same household-as-controller principle that governs refusals governs recovery: the cook's history is <em>theirs</em>, queryable on demand, never converted into a model of them.</p>
+
+<h3>Local-only lookup</h3>
+<div class="success">
+A subtle but important property: after the LLM disambiguates which entry the cook meant, the recipe itself is pulled from localStorage on the client. The recipe text never crosses the network during recovery. This strengthens the on-device boundary that the architecture has held throughout &mdash; only dish names and dates are sent to the inference provider for matching, not the recipes themselves.
+</div>
+
+<h2 id="sec-loop">5. The boundary loop: how patterns emerge through use</h2>
+
+<p>This is the most architecturally distinctive part of the system. The mechanism that turns nightly observations into stable household knowledge.</p>
+
+<h3>The observation stream</h3>
+<p>Every tile tap and every freeform text submission gets logged to <code>observationLog</code> in localStorage. Each entry has the date, day of week, source (tile vs. open-input), and the text itself. This log accumulates passively as the household uses the app. It's never shown to the user as a feature; it's the substrate the detection layer reads from.</p>
+
+<h3>Detection</h3>
+<p>Once per week (gated by a <code>lastDetectionRun</code> timestamp), if the observation log has at least five entries in the last six weeks, the system kicks off a non-blocking call to <code>/api/detect-patterns</code>. The detection call sends the recent observations to the LLM with a structured-output prompt asking: <em>are there recurring patterns by day of week worth surfacing? A pattern qualifies if it has occurred at least three times in the window, clusters on a specific day, and represents a real household rhythm rather than a generic state.</em> The model returns candidates with day, time estimate, description, occurrence count, and a short label.</p>
+
+<p>The detection call is its own LLM round trip, separate from recommendation generation. It runs in the background &mdash; the user never sees a "detecting patterns" UI &mdash; and its results are stored quietly in <code>pendingCandidates</code>. If detection fails (API down, parse error), the bookkeeping advances anyway and detection retries the following week.</p>
+
+<p>The system also passes detection a list of already-ratified and already-dismissed patterns, instructing it not to re-surface them. There's a defensive second pass server-side that filters candidates against those lists, in case the model overlooks the instruction.</p>
+
+<h3>Ratification</h3>
+<p>When at least one candidate is pending, the system surfaces it at the lowest-stakes possible moment &mdash; after the user taps "I'm cooking this." A small component appears beneath the recipe with a single question in the system's voice (<em class="spoken">Tuesday &mdash; Tyler day?</em>) and three response paths: yes, no, or a typed clarification ("yeah, until June"). Yes promotes the candidate to ratified observations. No adds it to dismissals, suppressing it from future detection runs. Typed responses get sent to a small parser LLM call (<code>/api/parse-ratification</code>) that extracts a yes/no plus any expiration date, then routes accordingly.</p>
+
+<div class="callout">
+The key constraint: at most one ratification prompt per session. If multiple candidates are pending, only the most recent surfaces; the rest wait for future sessions. This protects against the household feeling barraged after a detection run that finds several patterns at once.
+</div>
+
+<h3>Promotion</h3>
+<p>Ratified observations get stored in <code>ratifiedObservations</code> with the structured fields, the ratification timestamp, and any expiration date. From the next recommendation onward, the prompt assembly includes ratified observations relevant to today's day of week:</p>
+
+<pre style="background: #f4f4f4; padding: 10px 14px; border-radius: 4px; font-size: 9.5pt; overflow-x: auto;">## PATTERNS THE HOUSEHOLD HAS CONFIRMED FOR TUESDAYS
+
+- Jack with Tyler for tutoring, until 5pm</pre>
+
+<p>The model is instructed to treat these as constraints just like configured boundaries. The recommendation's <code>whyItFits</code> line then references the pattern specifically &mdash; <em class="spoken">5:30 dinner makes sense, Tyler wraps at 5</em> &mdash; closing the loop. A fact the household typed three Tuesdays ago, ratified once, has now reshaped how the system reasons about Tuesdays.</p>
+
+<div class="highlight-box">
+<strong>The architectural property being demonstrated:</strong> emergent boundaries can flow back through the system and shape future recommendations in a way the household actually feels. The household profile grows itself through use. No retraining, no fine-tuning, no learned model &mdash; just structured state, accumulated through a single ratification gesture per pattern.
+</div>
+
+<h2 id="sec-voice-surfaces">6. The two voice surfaces and what they share</h2>
+
+<p>Sixish currently has two surfaces where the system speaks beyond the recommendation itself.</p>
+
+<h3>After-cook ratification</h3>
+<p>The component described above &mdash; a single quiet question after "I'm cooking this," low-stakes by design.</p>
+
+<h3>Sunday check-in</h3>
+<p>A weekly surface, accessed through a quiet line on the home screen on Sundays only (<em class="spoken">Sunday &mdash; got a minute to look ahead?</em>). The Sunday screen batches three categories: pending ratifications that haven't yet surfaced via after-cook, expiring boundaries within the next 14 days (both ratified observations and configured seasonal items), and anticipatory questions about the coming week (generated by a small set of hardcoded detectors &mdash; recurring tile patterns not yet ratified, schedule transitions like a partner's rotation flipping, seasonal events like the local market opening).</p>
+
+<p>Both surfaces speak in the same voice and write to the same downstream layer. A ratification produced via after-cook and one produced via Sunday produce identical state &mdash; the recommendation prompt assembly is agnostic to which surface created it. This dual-surface composability is the architectural property that makes future surfaces cheap to add: each new surface inherits the established voice rather than re-establishing it, and downstream layers don't have to know about new upstream surfaces.</p>
+
+<h3>Configured boundary editability through use</h3>
+<p>A subtle piece of architecture worth naming. Configured boundaries are hardcoded in <code>household.ts</code> &mdash; the user can't edit them through the UI. But when a user extends a configured boundary's expiration date through the Sunday flow ("yes, but until June 15"), the extension can't write back to the constants file. The clean answer: a ratified observation is created that <em>shadows</em> the configured boundary with the new expiration, and the detection logic skips configured boundaries that are shadowed. The original configured entry is preserved; the ratified shadow effectively overrides it. This means configured boundaries can be modified through use without the constants file ever changing, which is the right architecture once user-controlled configured boundaries become editable through real onboarding.</p>
+
+<h2 id="sec-voice-consistency">7. How voice consistency is maintained</h2>
+
+<p>A consistent voice across all surfaces is structurally important &mdash; if Sixish sounded like several different products glued together, the felt-quality of the architecture would collapse. The voice is maintained through three reinforcing mechanisms.</p>
+
+<h3>A voice style guide as project documentation</h3>
+<p>A written specification with rules, sample copy across every context where the system speaks, and explicit failure-mode examples. The guide is treated as authoritative: any copy that fails the guide is rewritten until it doesn't. The guide is also versioned &mdash; as new contexts emerge, sample copy is added.</p>
+
+<h3>Voice rules in every system prompt</h3>
+<p>A condensed version of the voice guide ships in the system prompt for every LLM call &mdash; the recommendation generator, the recovery classifier, the recovery matcher, the pattern detector, the ratification parser. The condensed version: <em>speak observationally, reference specific things, use household member names, never use "I noticed" or "I see" or other observation-asserting language, ask questions when reasoning from inferred-but-unobservable facts, no marketing adjectives.</em> The model is given enough constraint to stay in voice without being micro-managed.</p>
+
+<h3>Forbidden phrases</h3>
+<div class="critical">
+A specific list of phrases that never appear in the system's output, regardless of context: <em>I noticed</em>, <em>I see</em>, <em>I've seen</em>, <em>based on</em>, <em>your preferences</em>, <em>your profile</em>, <em>your favorites</em>, <em>configure</em>, <em>settings</em>. These are the phrases that would convert Sixish from "a small attentive presence" into "a system observing and modeling you," and the line between the two is crossed at the phrase level. Forbidding them absolutely is more reliable than trying to make individual judgment calls in each generation.
+</div>
+
+<p>The architectural payoff: the voice holds across surfaces because the rules that produce it are uniform across surfaces. Adding a third or fourth voice surface in the future doesn't require re-establishing what the system sounds like; it inherits.</p>
+
+<h2 id="sec-ask-assert">8. The ask-vs-assert principle</h2>
+
+<p>A small but important rule, applied at the prompt level. The system has two kinds of facts it can reason from:</p>
+
+<p><strong>System-known facts</strong> &mdash; date, weather, day of week, what the user just typed, stored boundaries. The system either has these directly or has reliable derivations from them.</p>
+
+<p><strong>Inferred-but-unobservable facts</strong> &mdash; whether leftovers actually exist in the fridge, whether an ingredient is still around, whether a planned activity actually happened. The system can compute that leftovers <em>should</em> exist (yesterday's portionsCooked exceeded household size) but can't verify the fridge.</p>
+
+<div class="callout">
+<strong>The rule:</strong> assert about the first kind, ask about the second. A leftover-aware recommendation looks like <em class="spoken">any orzo left?</em> &mdash; a question, because the system can't see the fridge. A schedule-aware recommendation looks like <em class="spoken">5:30 dinner makes sense, Tyler wraps at 5</em> &mdash; an assertion, because the schedule is a stored boundary.
+</div>
+
+<p>This principle preserves honesty in the voice. Most LLM-driven products default to confident assertions about everything because confidence reads as competence. Sixish's discipline is to ask when it doesn't know, which paradoxically reads as warmer and more trustworthy than fake confidence &mdash; because the household is rarely surprised by being wrong, since the system mostly only asserts things it can actually back up.</p>
+
+<h2 id="sec-degradation">9. Graceful degradation as a structural property</h2>
+
+<p>A specific architectural commitment: when the household ignores any of the system's surfaces, the system never escalates.</p>
+
+<p>This shows up in concrete ways:</p>
+
+<ul>
+  <li>If detection runs and finds candidates the household never engages with, the candidates eventually get filtered out by recency, but the system never adds badge counts or "you have N pending patterns" notifications.</li>
+  <li>If a ratified boundary's expiration date passes without the household confirming an extension, the boundary expires silently. The next Sunday surfaces it as already-expired with a different question (<em class="spoken">drama club wrapped a few weeks back. Still done, or back at it?</em>), giving graceful re-entry without nagging.</li>
+  <li>If the household ignores the Sunday line for several Sundays in a row, the fifth Sunday looks identical to the first. Pending ratifications continue surfacing through the after-cook path; the Sunday surface is <em>additional</em>, not primary.</li>
+  <li>Anticipatory questions disappear after their relevance window. <em class="spoken">Liz's on-week starts tomorrow</em> is about that week; if it's not engaged with, it doesn't carry forward.</li>
+</ul>
+
+<div class="highlight-box">
+<strong>The structural property:</strong> the cost of ignored engagement is borne by the system (boundaries expire, patterns go unratified) rather than by the household (no nags, no badge counts, no accumulated friction). This is the household-as-controller principle applied at the temporal level &mdash; the household decides when to engage; the system honors the decision without keeping score.
+</div>
+
+<h2 id="sec-storage">10. Storage, persistence, and data architecture</h2>
+
+<p>v0 keeps everything in browser localStorage. Single-user, single-browser, no backend persistence. Specific keys:</p>
+
+<ul>
+  <li><code>sixish:nightLog</code> &mdash; what was cooked, with portions, household size, and (after the recovery change) the full recipe block from the recommendation that was accepted</li>
+  <li><code>sixish:observationLog</code> &mdash; every tile tap and freeform input, dated</li>
+  <li><code>sixish:pendingCandidates</code> &mdash; detected patterns awaiting ratification</li>
+  <li><code>sixish:ratifiedObservations</code> &mdash; confirmed patterns</li>
+  <li><code>sixish:dismissedCandidates</code> &mdash; patterns the household said no to</li>
+  <li><code>sixish:weeklyNotes</code> &mdash; anticipatory typed responses, scoped to a week</li>
+  <li><code>sixish:anticipatorySettled</code> &mdash; anticipatory items the household has resolved</li>
+  <li><code>sixish:sundayCheckInState</code> &mdash; per-Sunday tracking of which items got resolved or skipped</li>
+  <li><code>sixish:lastDetectionRun</code> &mdash; throttle for the once-per-week detection call</li>
+</ul>
+
+<p>Configured boundaries and culinary anchors live in the codebase rather than localStorage, because they're hardcoded in v0. When onboarding gets built, both move into localStorage with the same call signatures, and the prompt assembly doesn't change.</p>
+
+<p>The storage layer is abstracted behind a clean interface in <code>lib/storage.ts</code> &mdash; components and API routes never touch localStorage directly. This matters because the eventual production architecture is likely <em>not</em> localStorage-only. The probable path: local-first storage with the household data on-device, but cloud-based LLM inference for the actual recommendation calls. The storage abstraction lets that migration happen without changes to consumers.</p>
+
+<p>For a marketed Sixish, the privacy posture matters. Household text &mdash; kid activities, work schedules, family rhythms &mdash; is meaningfully personal. The architecture is designed to send only what's needed for each LLM call to the inference provider, with no persistent server-side storage of household profiles. The recovery flow is a small example of the discipline at work: the matcher receives dish names and dates only; recipe text is pulled from localStorage on the client after the matcher returns an <code>entryDate</code>. Eventually some of the structural reasoning (pattern detection, boundary matching, recovery classification) probably moves on-device using smaller open models, while the harder reasoning (recommendation generation, recipe writing) continues to use a frontier model with minimized context. That's a multi-year arc; the architecture is designed to absorb the migration when local model quality crosses the line.</p>
+
+<h2 id="sec-model">11. The model integration: what the LLM actually does</h2>
+
+<p>The system uses a single frontier model (<code>claude-sonnet-4-6</code> in v0) for five purposes:</p>
+
+<ol>
+  <li><strong>Recommendation generation.</strong> Reads the four-layer prompt and produces a structured recommendation. The model is doing meaningful reasoning here &mdash; weighing tonight's situation against the household's repertoire, considering recent nights, deciding whether leftovers are appropriate, naming a specific dish, writing a one-line reason that references the actual context.</li>
+  <li><strong>Recovery classification.</strong> Reads the cook's freeform input and decides whether it's a recovery query (referring to a past meal) or a forward-looking situational input. Returns a structured <code>{ isRecovery, hint }</code>. Cheap call, lightweight prompt, defaults to forward-looking on ambiguity.</li>
+  <li><strong>Recovery matching.</strong> Reads the cook's hint plus a compact summary of recent nights and identifies the most likely match &mdash; or asks a clarifying question if multiple entries fit, or returns a graceful no-match if nothing plausible exists. Constrained explicitly against inventing recipes the cook didn't cook.</li>
+  <li><strong>Pattern detection.</strong> Reads several weeks of observation logs and identifies recurring rhythms. The detection prompt is fairly constrained &mdash; clear examples of what counts and what doesn't &mdash; but the model is genuinely doing fuzzy matching across messy human input ("Tyler tutoring till 5", "math help today", "tutor day" → one pattern).</li>
+  <li><strong>Conditional ratification parsing.</strong> Reads a typed user response like "yeah, until June" and extracts a yes/no plus an optional expiration date. Cheaper call, more structured output, less reasoning load.</li>
+</ol>
+
+<p>The architecture is designed around the model doing the reasoning and the system providing well-structured context. There are no hand-coded recommendation rules, no preference-matching algorithms, no scoring functions. The model reads the layered description, applies its own reasoning, and produces output. The system's job is to make sure the description is honest and complete, the voice rules are clear, and the output schema is enforced.</p>
+
+<div class="callout">
+This is a deliberate bet. Most recommendation systems try to make the algorithm explicit because explicit algorithms are debuggable. Sixish bets that for situational decisions like "what should we eat tonight given everything that's true about tonight," explicit algorithms would be worse than a frontier model reading good context. The bet has held in v0 validation. It scales as long as frontier models keep getting better at nuanced reasoning, which they have been.
+</div>
+
+<h2 id="sec-validation">12. Validation and testing</h2>
+
+<p>The system has been validated end-to-end through several deliberate architectural tests:</p>
+
+<ul>
+  <li><strong>The boundary loop closes.</strong> A pattern surfaced through after-cook ratification flows back into the recommendation prompt and concretely shapes the <code>whyItFits</code> line on the relevant day of the week.</li>
+  <li><strong>The dual-surface architecture is composable.</strong> A ratification produced via after-cook and the same ratification extended via Sunday produce identical downstream state, and the recommendation prompt reflects the most recent state regardless of which surface produced which change.</li>
+  <li><strong>Voice holds across cadences.</strong> Per-session, weekly, and on-demand surfaces all speak in the same register, with no detectable drift.</li>
+  <li><strong>Configured boundaries can be extended through use.</strong> A hardcoded seasonal boundary's expiration date can be extended via the Sunday flow without editing the constants file, through the shadow-with-ratified-observation mechanism.</li>
+  <li><strong>Recovery routes correctly and stays in voice.</strong> Forward-looking input (tile labels and freeform situational input) routes to recommendation. Recovery input routes through the classifier to the matcher, which returns match, clarify, or none. Matched entries pull recipes from localStorage rather than regenerating. Voice rules and forbidden phrases hold across recovery responses.</li>
+  <li><strong>Recipe persistence works without migration.</strong> New nights store the recipe block; old nights without it produce a graceful "didn't store the recipe back then" response rather than fabrication.</li>
+</ul>
+
+<p>A dev panel with prompt inspection makes the entire LLM context visible during testing, which makes architectural validation tractable: it's possible to confirm not just that the right recommendation came back, but that the right facts reached the model, and that the model used them. The panel surfaces the recovery path explicitly when taken &mdash; including the classifier's decision, the hint extracted, and the matcher's structured result &mdash; so misbehavior in routing can be diagnosed without guessing.</p>
+
+<h2 id="sec-not-doing">13. What the architecture is <em>not</em> doing</h2>
+
+<p>A few things worth being explicit about, because they're conventional in the category and absent here:</p>
+
+<div class="nogo-card"><strong>No preference modeling.</strong> The system never builds a model of what the household likes. It captures facts about what the household cooks (anchors) and confirms patterns about how they live (ratified observations). There's no learned preference vector, no taste embedding, no recommendation score.</div>
+
+<div class="nogo-card"><strong>No collaborative filtering.</strong> Sixish doesn't compare your household to other households. There's no "users like you also liked" anywhere in the architecture.</div>
+
+<div class="nogo-card"><strong>No retrieval-augmented recipe database.</strong> The model generates recipes directly. There's no curated recipe corpus being searched, no embedding-based recipe matching, no fixed catalog. This has trade-offs &mdash; the model can hallucinate quantities or miss niche regional dishes &mdash; but it keeps the architecture simple and lets the recommendation be shaped fully by context rather than constrained by what's in a database.</div>
+
+<div class="nogo-card"><strong>No recipe archive.</strong> Recovery exists, but as a queryable interface to the cook's own night log, not as a browseable library. There is no "view all past recipes" surface, no favorites, no tags. The cook's history is a substrate for situational queries, not a content layer.</div>
+
+<div class="nogo-card"><strong>No fine-tuning.</strong> No training of the model on household data. The household-specific knowledge lives entirely in the prompt context, not in model weights. This means switching to a better frontier model is a configuration change, not a retraining cycle.</div>
+
+<p>The discipline across all of these: as much of the architecture as possible lives in well-structured context and prompt design, not in trained models or hand-coded rules. The frontier model does the reasoning; the system does the structuring.</p>
+
+<h2 id="sec-modes">14. Modes: protecting the cook's matching faculty over time</h2>
+
+<div class="callout">
+This section describes a forward-looking architectural commitment that has not been built into v0 but that shapes how the rest of the architecture is expected to evolve. It deserves a substantive treatment here because it carries a commitment about <em>what kind of product Sixish is</em>, not just what features it offers.
+</div>
+
+<h3>The problem</h3>
+<p>Sixish takes over the cook's situational-matching faculty &mdash; the practiced, fluid capacity to look at a Tuesday at 5pm with half a chicken in the fridge, two tired people, and a hungry kid, and <em>know</em> without thinking "okay, quesadillas." This faculty is what cooks call instinct. In other domains it's called clinical judgment, airmanship, taste. It's tacit, accumulated through thousands of repetitions, and &mdash; like any tacit faculty &mdash; it atrophies when consistently delegated. The architectural risk Sixish runs is the maintenance threat described in the Capability Companion: the cook stays productive, the meals stay good, and the underlying matching faculty quietly goes slack. The cook doesn't notice until they have to plan a week of dinners somewhere without the app and find that the muscle isn't quite there.</p>
+
+<p>The cooking itself &mdash; knife work, heat, timing, taste correction &mdash; is exercised every night and is structurally protected. The matching faculty is not, because Sixish does the matching. This is the gap the modes architecture is designed to address.</p>
+
+<h3>Four modes</h3>
+<p>The architecture introduces four modes that vary how much matching the system does versus how much the cook does. Mode is a structural commitment about <em>which faculty is exercised tonight</em>, not a preference setting.</p>
+
+<div class="mode-card">
+  <h4>SUGGEST</h4>
+  <p>The current default. <em class="spoken">What's tonight like? Here's what to make.</em> One recommendation, cook evaluates, refusal honored. AI does the matching; the cook does the executional work. This is the depleted-Tuesday mode. Sixish is already excellent at it.</p>
+</div>
+
+<div class="mode-card">
+  <h4>ECHO</h4>
+  <p>Inverts the relationship. The cook proposes the dish; the system reflects situational context they might not have weighed and surfaces specific things it knows. <em class="spoken">Quesadillas &mdash; Liz's late, you'll want them ready by 6. Shred yesterday's chicken or use what you bought today?</em> The matching faculty is exercised by the cook; the system is a bounded helper at the edges.</p>
+</div>
+
+<div class="mode-card">
+  <h4>SCAFFOLD</h4>
+  <p>Narrows the system to a reference layer. The cook is generating from scratch. The system answers only what's asked, in narrow scope: timing, substitution, technique. <em class="spoken">How long for chicken thighs at 425? What can replace tahini?</em> No suggestions, no proposals, no situational context volunteered. The friction is the point.</p>
+</div>
+
+<div class="mode-card">
+  <h4>QUIET</h4>
+  <p>Takes the system out of the loop entirely. The cook cooks. The system says nothing during the meal. Afterward &mdash; only afterward &mdash; the cook can log what was made so the night log keeps updating and the observation stream continues. The matching faculty works under nothing-but-its-own-conditions, which is the only way to know it's still there.</p>
+</div>
+
+<h3>Mode as a fifth prompt layer</h3>
+<p>Mode lives in localStorage as <code>sixish:currentMode</code> and is prepended to the system prompt as a fifth layer above the existing four. <em>The cook is in SCAFFOLD mode tonight. Do not suggest dishes. Answer only what is asked, in narrow scope.</em> The model already follows layered context with discipline; one more layer doesn't strain the architecture. No new model, no fine-tuning. Voice rules become mode-conditional &mdash; in SCAFFOLD, do not volunteer context, do not name household members unless asked, do not offer alternatives. The forbidden-phrase list grows slightly per mode.</p>
+
+<h3>Per-week default, per-night override</h3>
+<p>Mode persistence runs at two cadences. A per-week default is settable on Sunday (<em class="spoken">Want to cook from scratch one night this week?</em>). A per-night override is settable from the home screen and rules tonight without changing the week's default. This mirrors how cooks actually work &mdash; they have a general posture toward the week, and individual nights blow it up. The default is SUGGEST. Households that never engage with mode switching get the product they have today.</p>
+
+<h3>The home screen changes per mode</h3>
+<p>This is where the modes stop being prompt engineering and become product design. SUGGEST is the current home screen. ECHO replaces the tiles with a single input &mdash; <em class="spoken">what are you thinking?</em> &mdash; and the system reflects rather than proposes. SCAFFOLD becomes a question box: <em class="spoken">ask me something</em>; no tiles, no contextual line, no recommendation. QUIET is almost nothing: <em class="spoken">cook well. log it after if you want.</em> The visual distinction is the metacognitive moment. The cook sees, on opening the app, what muscle they're committed to using tonight.</p>
+
+<h3>Matching debt</h3>
+<p>The structural cousin of cooking debt. Not exposed to the user &mdash; that would be nagging &mdash; but used internally to tilt Sunday invitations. The system tracks the ratio of SUGGEST sessions to total sessions over a recent window. If the ratio crosses a threshold (probably high, around 80%), the Sunday surface includes one quiet question: <em class="spoken">Want to cook from scratch one night this week?</em> Tap yes → that night becomes QUIET when it arrives. Tap no or ignore → no badge count, no escalation, ask again maybe in a few weeks. Same logic in reverse: a cook who has been in SCAFFOLD or QUIET heavily and seems depleted gets a Sunday invitation toward SUGGEST.</p>
+
+<p>This is the AGRIOS confidence layer applied at the meta-boundary cadence. The system isn't <em>deciding</em> the cook needs SCAFFOLD; it's noticing a pattern and <em>offering</em> a mode shift, with the household retaining full controller authority. The same graceful-degradation discipline that governs every other surface applies here: ignored invitations don't accumulate, don't escalate, and don't get re-asked next week.</p>
+
+<h3>QUIET as the verification mode</h3>
+<div class="highlight-box">
+Worth stating directly: QUIET mode is not a feature for the cook. It is the architecture's protection of the cook from the rest of the architecture. Without QUIET, Sixish is a maintenance-threat product that has been carefully designed but not verified &mdash; the cook has no way to know whether the matching faculty is still alive. With QUIET, Sixish becomes something rarer: an LLM-native product that has built in its own capability check. The Sunday invitation toward QUIET, for cooks with high matching debt, is the closest thing Sixish can offer to a capability verification protocol &mdash; not as a test the system administers, but as an opportunity the system makes available. The cook who takes it learns something about themselves. The cook who refuses it has at least been asked.
+</div>
+
+<h3>Recovery and modes</h3>
+<p>Recipe recovery sits cleanly inside the modes architecture. In SUGGEST and ECHO, recovery surfaces through the freeform input as it does today. In SCAFFOLD, recovery is a reference query &mdash; answered narrowly, no offer of variations. In QUIET, recovery during the cook is suppressed; the post-cook log entry is where recent-nights reference belongs. The recovery work that landed in v0 is the foundation that ECHO mode will lean on heavily &mdash; <em class="spoken">what are you thinking?</em> naturally pulls from the cook's repertoire, and the night log is now a recoverable repertoire.</p>
+
+<h3>Implementation order</h3>
+<p>The modes work is additive to v0 and can land in stages: mode as prompt layer first (no UI changes, validate model behavior in each mode through the dev panel); per-night override on the home screen; the four mode-specific home screens; Sunday invitations driven by matching debt; QUIET-mode post-cook logging. Nothing in v0 needs to be restructured; modes are a new structural commitment layered on top of the existing architecture.</p>
+
+<h2 id="sec-future">15. Where the architecture is heading</h2>
+
+<p>Beyond the modes work described above, the current architecture is v0 &mdash; single household, single cook, hardcoded boundaries, localStorage persistence. Other probable evolutions:</p>
+
+<ul>
+  <li><strong>Onboarding</strong> that captures configured boundaries and anchors through three or four conversational questions, with the same call signatures so the prompt assembly doesn't change.</li>
+  <li><strong>Multi-user households</strong> so partners share the same profile, both can ratify patterns, both contribute observations.</li>
+  <li><strong>Un-detection layer</strong> &mdash; the counterpart to detection, surfacing soft check-ins when ratified patterns stop appearing in observations ("Tuesday tutoring still happening?"). Patterns can fade as well as form.</li>
+  <li><strong>Local-insider knowledge layer</strong> &mdash; community-grounded culinary knowledge specific to where the household lives, surfaced as another input to the prompt without being forced into recommendations.</li>
+  <li><strong>Hybrid local/cloud inference</strong> &mdash; pattern detection, recovery classification, and structured matching move on-device using smaller models; recommendation generation continues to use a frontier model with minimized context. Privacy posture improves as more reasoning runs locally.</li>
+  <li><strong>More voice surfaces</strong> &mdash; additional cadences (morning rhythm, in-the-moment shopping help) inheriting the established voice.</li>
+</ul>
+
+<p>Each of these is an additive change to the layered architecture rather than a restructuring of it. The discipline is that new layers absorb new kinds of facts the household states or confirms; the system never starts modeling preferences or learning from behavior in ways the household hasn't ratified.</p>
+
+<h2 id="sec-bet">16. The architectural bet, restated</h2>
+
+<p>Sixish bets that the right architecture for situational decisions like "what should we eat tonight" is:</p>
+
+<ul>
+  <li>A layered, honest description of the household and the situation</li>
+  <li>A frontier model doing the reasoning over that description</li>
+  <li>A consistent voice across all surfaces, maintained through structural discipline</li>
+  <li>Emergent state added only through household ratification, never through silent inference</li>
+  <li>Refusals as constraints, not as preferences to be aggregated</li>
+  <li>Graceful degradation when engagement lapses</li>
+  <li>The cook's own situational-matching faculty deliberately exercised, not silently replaced</li>
+</ul>
+
+<div class="success">
+That last bet is the one most LLM-native products do not make, and the one the modes architecture exists to honor. The first six bets shape what Sixish does in any given session. The seventh shapes what Sixish refuses to become over years of use.
+</div>
+
+<p>Most cooking apps make different bets &mdash; recipe corpora, preference models, discovery feeds, planning tools. Sixish's bet is that those approaches are solving the wrong problem (search, not deciding) with the wrong machinery (aggregation, not ratification), and increasingly that they are also failing to protect the very capability they claim to support. The validation so far suggests the bet holds. Whether it scales to many households, whether the voice continues to feel right over months of use, whether the local-knowledge layer becomes the differentiator it could be, whether the modes work succeeds in keeping cooks' matching faculty alive &mdash; those are the questions the next phase answers.</p>
+
+</div>
+<!-- END TAB 2 -->
+
+
+<script>
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tab-' + tabName).classList.add('active');
+  // Find the button that triggered this — match by data attribute or text
+  var btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(function(b) {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + tabName + "'") !== -1) {
+      b.classList.add('active');
+    }
+  });
+  // Scroll the tab content into view (header above stays visible)
+  document.querySelector('.tab-nav').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+</body>
+</html>
