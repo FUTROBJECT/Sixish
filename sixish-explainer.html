@@ -292,11 +292,10 @@
   .phone-frame {
     display: inline-block;
     background: #111;
-    padding: 0;
+    padding: 6px;
     border-radius: 38px;
     box-shadow: 0 10px 28px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.08), inset 0 0 0 1px #2a2a2a;
     position: relative;
-    overflow: hidden;
     line-height: 0;
   }
   .phone-frame::before {
@@ -312,12 +311,18 @@
     z-index: 2;
     pointer-events: none;
   }
-  .phone-frame img {
-    display: block;
+  .phone-screen {
     width: 290px;
-    height: auto;
-    border-radius: 38px;
-    background: #fff;
+    border-radius: 32px;
+    overflow: hidden;
+    background: #f5efe2;
+    line-height: 0;
+  }
+  .phone-screen img {
+    display: block;
+    width: 110%;
+    margin-left: -5%;
+    background: #f5efe2;
   }
   .phone-figure figcaption {
     font-size: 9.5pt;
@@ -479,7 +484,7 @@
 </div>
 
 <figure class="phone-figure">
-  <div class="phone-frame"><img src="assets/screenshots/01-home.png" alt="Sixish home screen showing the title, contextual line (Thursday May 7, 61 degrees and clear, Tower Grove South, last cooked 2 days ago), six tile options, and a freeform input."></div>
+  <div class="phone-frame"><div class="phone-screen"><img src="assets/screenshots/01-home.png" alt="Sixish home screen showing the title, contextual line (Thursday May 7, 61 degrees and clear, Tower Grove South, last cooked 2 days ago), six tile options, and a freeform input."></div></div>
   <figcaption>
     <span class="caption-label">The home screen</span>
     The contextual line under the title &mdash; <em>Thursday, May 7 &middot; 61&deg; and clear &middot; Tower Grove South &middot; last cooked 2 days ago</em> &mdash; is the visible surface of Layer 4 (per-night observations). Six tiles plus the freeform input are the entry points to the recommendation flow.
@@ -535,7 +540,7 @@
 </div>
 
 <figure class="phone-figure">
-  <div class="phone-frame"><img src="assets/screenshots/02-leftover-recommendation.png" alt="Recommendation screen showing 'carne asada street taco leftovers' with an EAT WHAT'S ALREADY COOKED badge and an explanation referencing Tuesday's carne asada cooked for 6, with three portions likely sitting in the fridge."></div>
+  <div class="phone-frame"><div class="phone-screen"><img src="assets/screenshots/02-leftover-recommendation.png" alt="Recommendation screen showing 'carne asada street taco leftovers' with an EAT WHAT'S ALREADY COOKED badge and an explanation referencing Tuesday's carne asada cooked for 6, with three portions likely sitting in the fridge."></div></div>
   <figcaption>
     <span class="caption-label">Layer 4 in action</span>
     A leftover-aware recommendation, surfaced because last night's <code>portionsCooked</code> exceeded household size. The most-ephemeral layer (the night log entry from two days ago) is the hinge here &mdash; it shapes today's recommendation without needing to be a configured boundary or a ratified pattern.
@@ -559,7 +564,7 @@
 </ol>
 
 <figure class="phone-figure">
-  <div class="phone-frame"><img src="assets/screenshots/03-reading-the-room.png" alt="Loading screen with the user's tile selection 'Got time, want to cook' shown above a card reading 'Reading the room...'"></div>
+  <div class="phone-frame"><div class="phone-screen"><img src="assets/screenshots/03-reading-the-room.png" alt="Loading screen with the user's tile selection 'Got time, want to cook' shown above a card reading 'Reading the room...'"></div></div>
   <figcaption>
     <span class="caption-label">Step 5 in flight</span>
     The user has tapped <em class="spoken">Got time, want to cook</em>; the server has assembled the four-layer prompt and called Anthropic's API. The loading copy is itself a small voice surface &mdash; <em class="spoken">reading the room</em>, not <em>processing</em> or <em>thinking</em>.
@@ -594,7 +599,7 @@ The recommendation is <em>one</em> dish, not a list. This is a deliberate archit
 <p>Before recovery, the night log captured dish name, date, day of week, household size, and portions &mdash; enough for leftover detection and pattern detection but not enough for recovery, since regenerating "the same" recipe would actually produce a <em>similar</em> recipe and that gap matters when the cook is trying to recreate a specific night. The recipe is now persisted alongside the existing fields when "I'm cooking this" is tapped. Old entries without the field are gracefully unrecoverable &mdash; if the matcher returns an <code>entryDate</code> for an entry that predates the change, the client converts the response to "found the entry but didn't store the recipe back then" rather than fabricating one.</p>
 
 <figure class="phone-figure">
-  <div class="phone-frame"><img src="assets/screenshots/05-recipe-view.png" alt="Recipe view for butter chicken masala showing the marinade and sauce ingredient lists."></div>
+  <div class="phone-frame"><div class="phone-screen"><img src="assets/screenshots/05-recipe-view.png" alt="Recipe view for butter chicken masala showing the marinade and sauce ingredient lists."></div></div>
   <figcaption>
     <span class="caption-label">What gets persisted</span>
     The full recipe block is stored to <code>sixish:nightLog</code> when the user taps <em class="spoken">I'm cooking this</em>. This is the field that makes a specific night recoverable later &mdash; not a regenerated <em>similar</em> recipe, but the exact one the cook was rendered.
@@ -640,7 +645,7 @@ The key constraint: at most one ratification prompt per session. If multiple can
 <p>The model is instructed to treat these as constraints just like configured boundaries. The recommendation's <code>whyItFits</code> line then references the pattern specifically &mdash; <em class="spoken">5:30 dinner makes sense, Tyler wraps at 5</em> &mdash; closing the loop. A fact the household typed three Tuesdays ago, ratified once, has now reshaped how the system reasons about Tuesdays.</p>
 
 <figure class="phone-figure">
-  <div class="phone-frame"><img src="assets/screenshots/04-recommendation-result.png" alt="Recommendation card for 'butter chicken masala' with a why-it-fits paragraph that says: Liz gets home around 18:30 and Jack's back from drama by 18:00, so you have the kind of weekend-energy cook that fits when there's real time at the stove, and you haven't touched it recently."></div>
+  <div class="phone-frame"><div class="phone-screen"><img src="assets/screenshots/04-recommendation-result.png" alt="Recommendation card for 'butter chicken masala' with a why-it-fits paragraph that says: Liz gets home around 18:30 and Jack's back from drama by 18:00, so you have the kind of weekend-energy cook that fits when there's real time at the stove, and you haven't touched it recently."></div></div>
   <figcaption>
     <span class="caption-label">The loop closing</span>
     <code>whyItFits</code> referencing ratified observations directly &mdash; <em class="spoken">Liz gets home around 18:30 and Jack's back from drama by 18:00</em>. Patterns the household confirmed once through after-cook ratification are now reshaping how the system reasons about this specific evening.
