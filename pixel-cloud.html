@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Sixish — pixel cloud</title>
+<!--
+  DESIGN LAB — not part of the product.
+  Interaction model under test:
+    The dot cloud is the interface. Two-axis gesture plane:
+      vertical   = how much the system participates (up: more, down: less)
+      horizontal = who leads (right: system, left: cook)
+    swipe up-right   -> "I've got tonight."                (gathered warm cluster)
+    swipe up-left    -> "Your call — I'll check your math." (two mirrored arcs)
+    swipe down-right -> "Reference only tonight."           (orderly rows)
+    swipe down-left  -> "Quiet tonight — you've got this."  (dispersed, dim)
+    touch            -> local reaction (ripple / attraction)
+    hold             -> reveals the four stance hints at the corners
+    speak            -> dots collapse into a halftone waveform (mic when the
+                        context is secure; simulated cadence otherwise)
+    type             -> cloud lifts, glass input sheet rises
+  Skins cycle top-right: signal orange / harbor blue / sixish cream.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ff6116;
+    --text: #ffffff;
+    --text-soft: rgba(255, 255, 255, 0.75);
+    --text-faint: rgba(255, 255, 255, 0.45);
+    --glass-fill: rgba(255, 255, 255, 0.12);
+    --glass-stroke: rgba(255, 255, 255, 0.4);
+    --glow: #ffd27a;
+    --radius-pill: 999px;
+    --radius-sheet: 26px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: var(--bg);
+    transition: background 600ms ease;
+    font-family: "Urbanist", system-ui, sans-serif;
+    color: var(--text);
+    overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+  }
+  #stage { position: fixed; inset: 0; touch-action: none; display: block; }
+
+  .hint {
+    position: fixed; width: 150px; text-align: center;
+    transform: translate(-50%, -50%);
+    font-size: 13px; font-weight: 300; letter-spacing: 0.02em;
+    color: var(--text-soft);
+    opacity: 0; transition: opacity 500ms ease;
+    pointer-events: none; line-height: 1.35;
+  }
+  .hint .arrow { display: block; font-size: 15px; margin-bottom: 2px; color: var(--text-faint); }
+  .hints-on .hint { opacity: 1; }
+
+  #caption {
+    position: fixed; left: 50%; bottom: 132px; transform: translateX(-50%);
+    width: 86%; text-align: center;
+    font-size: 17px; font-weight: 300; letter-spacing: 0.02em;
+    color: var(--text); opacity: 0.92;
+    transition: opacity 400ms ease;
+    pointer-events: none;
+  }
+  #caption.dim { opacity: 0.45; }
+
+  #bar {
+    position: fixed; left: 50%; bottom: max(22px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    display: flex; gap: 34px; align-items: flex-start;
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+  #bar.hidden { opacity: 0; transform: translateX(-50%) translateY(16px); pointer-events: none; }
+  .ctl { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .ctl button {
+    width: 58px; height: 58px; border-radius: 50%;
+    border: 1px solid var(--glass-stroke);
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 150ms ease, background 300ms ease;
+    position: relative;
+  }
+  .ctl button:active { transform: scale(0.94); }
+  .ctl .lbl { font-size: 12.5px; font-weight: 300; color: var(--text-soft); letter-spacing: 0.03em; }
+  .ctl svg { width: 22px; height: 22px; stroke: var(--text); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+  #glow {
+    position: fixed; width: 240px; height: 240px; border-radius: 50%;
+    left: 50%; bottom: -40px; transform: translateX(calc(-50% + 46px));
+    background: radial-gradient(circle, var(--glow) 0%, transparent 65%);
+    opacity: 0; transition: opacity 600ms ease;
+    pointer-events: none; filter: blur(18px);
+  }
+  body.listening #glow { opacity: 0.55; }
+  body.listening #speakBtn { background: rgba(255, 255, 255, 0.28); }
+
+  #sheet {
+    position: fixed; left: 12px; right: 12px;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    transform: translateY(180%);
+    transition: transform 320ms cubic-bezier(0.3, 1, 0.4, 1), visibility 0s 320ms;
+    visibility: hidden;
+  }
+  #sheet.open { visibility: visible; transition-delay: 0s; }
+  #sheet.open { transform: translateY(0); }
+  #sheet input {
+    width: 100%; padding: 17px 22px;
+    border-radius: var(--radius-sheet);
+    border: 1px solid var(--glass-stroke);
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    color: var(--text); font: 300 16.5px "Urbanist", sans-serif;
+    letter-spacing: 0.02em; outline: none;
+  }
+  #sheet input::placeholder { color: var(--text-faint); }
+
+  #skins {
+    position: fixed; top: max(16px, env(safe-area-inset-top)); right: 18px;
+    display: flex; gap: 10px;
+  }
+  #skins button {
+    width: 16px; height: 16px; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.65); padding: 0;
+    opacity: 0.6; transition: opacity 200ms ease, transform 200ms ease;
+  }
+  #skins button.active { opacity: 1; transform: scale(1.25); }
+
+  #debug {
+    position: fixed; left: 18px; top: max(18px, env(safe-area-inset-top));
+    font: 400 10px ui-monospace, monospace; color: var(--text-faint);
+    letter-spacing: 0.05em; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<div class="hint" id="h-echo"><span class="arrow">↖</span>Your call — I'll check your math.</div>
+<div class="hint" id="h-suggest"><span class="arrow">↗</span>I've got tonight.</div>
+<div class="hint" id="h-quiet"><span class="arrow">↙</span>Quiet tonight — you've got this.</div>
+<div class="hint" id="h-scaffold"><span class="arrow">↘</span>Reference only tonight.</div>
+
+<p id="caption"></p>
+<div id="glow"></div>
+
+<div id="bar">
+  <div class="ctl">
+    <button id="typeBtn" aria-label="type">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    </button>
+    <span class="lbl">type</span>
+  </div>
+  <div class="ctl">
+    <button id="speakBtn" aria-label="speak">
+      <svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 10v4"/></svg>
+    </button>
+    <span class="lbl">speak</span>
+  </div>
+</div>
+
+<div id="sheet"><input id="sheetInput" placeholder="what's tonight like?" autocomplete="off" /></div>
+
+<div id="skins">
+  <button data-skin="orange" style="background:#ff6116"></button>
+  <button data-skin="blue" style="background:#7c99a6"></button>
+  <button data-skin="cream" style="background:#fdfaf3"></button>
+</div>
+
+<p id="debug"></p>
+
+<script>
+(() => {
+  const canvas = document.getElementById("stage");
+  const ctx = canvas.getContext("2d");
+  const caption = document.getElementById("caption");
+  const debug = document.getElementById("debug");
+  const body = document.body;
+  const sheet = document.getElementById("sheet");
+  const sheetInput = document.getElementById("sheetInput");
+  const bar = document.getElementById("bar");
+
+  const SKINS = {
+    orange: {
+      bg: "#ff6116", dot: [255, 255, 255], baseAlpha: 0.5,
+      text: "#ffffff", soft: "rgba(255,255,255,0.75)", faint: "rgba(255,255,255,0.45)",
+      glass: "rgba(255,255,255,0.12)", stroke: "rgba(255,255,255,0.4)", glow: "#ffd27a",
+    },
+    blue: {
+      bg: "#7c99a6", dot: [255, 255, 255], baseAlpha: 0.46,
+      text: "#ffffff", soft: "rgba(255,255,255,0.78)", faint: "rgba(255,255,255,0.48)",
+      glass: "rgba(255,255,255,0.13)", stroke: "rgba(255,255,255,0.42)", glow: "#e9dc8c",
+    },
+    cream: {
+      bg: "#fdfaf3", dot: [58, 52, 44], baseAlpha: 0.42,
+      text: "#3a342c", soft: "rgba(58,52,44,0.7)", faint: "rgba(58,52,44,0.4)",
+      glass: "rgba(255,255,255,0.55)", stroke: "rgba(58,52,44,0.2)", glow: "#e8b89e",
+    },
+  };
+  let skin = SKINS.orange;
+
+  const STANCES = {
+    suggest: { line: "I've got tonight." },
+    echo: { line: "Your call — I'll check your math." },
+    scaffold: { line: "Reference only tonight." },
+    quiet: { line: "Quiet tonight — you've got this." },
+  };
+
+  const state = { mode: "suggest", listening: false, typing: false, micKind: "—" };
+
+  let W = 0, H = 0, DPR = 1, dots = [], cell = 20;
+
+  function buildGrid() {
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    cell = Math.max(15, Math.min(26, Math.round(Math.min(W, H) / 24)));
+    while ((Math.ceil(W / cell) + 1) * (Math.ceil(H / cell) + 1) > 1500) cell += 2;
+
+    dots = [];
+    const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
+    const ox = (W - (cols - 1) * cell) / 2, oy = (H - (rows - 1) * cell) / 2;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const hx = ox + c * cell, hy = oy + r * cell;
+        dots.push({
+          hx, hy,
+          nx: (hx - W / 2) / (W / 2), ny: (hy - H / 2) / (H / 2),
+          ax: 0, ay: 0, vx: 0, vy: 0,
+          s: 0.6, col: c, row: r,
+          ph: Math.random() * Math.PI * 2, rnd: Math.random(),
+        });
+      }
+    }
+  }
+
+  function colNoise(c, t) {
+    return 0.5 + 0.5 * Math.sin(c * 0.83 + t * 2.1) * Math.sin(c * 0.31 - t * 1.3);
+  }
+
+  let level = 0, simTarget = 0, simTimer = 0;
+  let audioCtx = null, analyser = null, micStream = null, timeData = null;
+
+  const WAVE_N = 128;
+  const waveHist = new Float32Array(WAVE_N);
+  let waveHead = 0;
+
+  async function startListening() {
+    state.listening = true;
+    waveHist.fill(0);
+    level = 0;
+    body.classList.add("listening");
+    caption.textContent = "listening";
+    caption.classList.remove("dim");
+    if (window.isSecureContext && navigator.mediaDevices?.getUserMedia) {
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = audioCtx.createMediaStreamSource(micStream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        timeData = new Uint8Array(analyser.fftSize);
+        src.connect(analyser);
+        state.micKind = "mic";
+      } catch { state.micKind = "sim"; }
+    } else state.micKind = "sim";
+    updateDebug();
+  }
+
+  function stopListening() {
+    state.listening = false;
+    body.classList.remove("listening");
+    if (micStream) { micStream.getTracks().forEach((t) => t.stop()); micStream = null; }
+    if (audioCtx) { audioCtx.close(); audioCtx = null; }
+    analyser = null; state.micKind = "—";
+    showStance();
+    updateDebug();
+  }
+
+  function sampleLevel(dt) {
+    if (analyser) {
+      analyser.getByteTimeDomainData(timeData);
+      let sum = 0;
+      for (let i = 0; i < timeData.length; i += 2) {
+        const v = (timeData[i] - 128) / 128; sum += v * v;
+      }
+      const rms = Math.sqrt(sum / (timeData.length / 2));
+      level += (Math.min(1, rms * 4.5) - level) * 0.25;
+    } else {
+      simTimer -= dt;
+      if (simTimer <= 0) {
+        simTimer = 0.1 + Math.random() * 0.35;
+        simTarget = Math.random() < 0.22 ? 0.06 : 0.15 + Math.random() * 0.75;
+      }
+      level += (simTarget - level) * 0.12;
+    }
+  }
+
+  const FORMS = {
+    suggest(d, t) {
+      const px = d.nx * 0.96, py = d.ny * 0.96 - 0.01;
+      const r2 = d.nx * d.nx + d.ny * d.ny;
+      const breathe = 0.1 * Math.sin(t * 1.1 + d.ph);
+      return [px, py, 0.42 + 1.4 * Math.exp(-r2 * 2.6) + breathe, 1];
+    },
+    echo(d, t) {
+      const sx = d.nx >= 0 ? 1 : -1;
+      const lobe = 0.52 + 0.18 * (1 - d.ny * d.ny);
+      const ax = Math.abs(d.nx);
+      const px = sx * (ax * 0.5 + lobe * 0.5);
+      const py = d.ny * 0.85;
+      const glow = 0.8 * Math.exp(-Math.pow((ax - lobe) * 2.4, 2));
+      const breathe = 0.08 * Math.sin(t * 1.3 + d.ph);
+      return [px, py, 0.4 + glow + breathe, 0.9];
+    },
+    scaffold(d, t) {
+      const py = (Math.round(d.ny * 2.5) / 2.5) * 0.82;
+      const breathe = 0.05 * Math.sin(t * 0.9 + d.ph);
+      return [d.nx * 0.95, py, 0.6 + breathe, 0.8];
+    },
+    quiet(d, t) {
+      const px = d.nx * 1.16, py = d.ny * 1.16 + 0.02;
+      const breathe = 0.045 * Math.sin(t * 0.5 + d.ph);
+      return [px, py, 0.38 + breathe, 0.42];
+    },
+  };
+
+  function targetFor(d, t) {
+    if (state.listening) {
+      const r = Math.hypot(d.nx, d.ny);
+      const back = (waveHead - Math.round(r * 52) + WAVE_N * 2) % WAVE_N;
+      const w = waveHist[back];
+      const bloom = (0.4 + 1.5 * level) * Math.exp(-r * r * 3.2);
+      const ring = 2.1 * w * Math.exp(-r * 0.75);
+      const shimmer = 0.07 * Math.sin(t * 2.2 + d.ph);
+      return [d.nx * 0.98, d.ny * 0.98, 0.3 + bloom + ring + shimmer, 1];
+    }
+    if (state.typing) {
+      const f = FORMS[state.mode](d, t);
+      return [f[0], f[1] * 0.78 - 0.12, f[2] * 0.85, f[3]];
+    }
+    return FORMS[state.mode](d, t);
+  }
+
+  const pointer = { active: false, x: 0, y: 0, downX: 0, downY: 0, downT: 0, moved: false, holdTimer: null };
+  const ripples = [];
+
+  function setMode(mode, impulse) {
+    if (STANCES[mode] === undefined) return;
+    if (state.listening) stopListening();
+    state.mode = mode;
+    showStance();
+    if (impulse) {
+      const m = 26;
+      for (const d of dots) {
+        const k = 0.55 + d.rnd * 0.9;
+        d.vx += impulse[0] * m * k;
+        d.vy += impulse[1] * m * k;
+      }
+    }
+    updateDebug();
+  }
+
+  function showStance() {
+    caption.textContent = STANCES[state.mode].line;
+    caption.classList.remove("dim");
+    clearTimeout(showStance._t);
+    showStance._t = setTimeout(() => caption.classList.add("dim"), 2200);
+  }
+
+  function updateDebug() {
+    debug.textContent =
+      state.mode + " · " +
+      (state.listening ? "listening" : state.typing ? "typing" : "idle") +
+      " · mic " + state.micKind;
+  }
+
+  canvas.addEventListener("pointerdown", (e) => {
+    pointer.active = true; pointer.moved = false;
+    pointer.x = pointer.downX = e.clientX;
+    pointer.y = pointer.downY = e.clientY;
+    pointer.downT = performance.now();
+    clearTimeout(pointer.holdTimer);
+    pointer.holdTimer = setTimeout(() => {
+      if (pointer.active && !pointer.moved) body.classList.add("hints-on");
+    }, 340);
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!pointer.active) return;
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    if (Math.hypot(e.clientX - pointer.downX, e.clientY - pointer.downY) > 14) pointer.moved = true;
+  });
+  function pointerEnd(e) {
+    if (!pointer.active) return;
+    pointer.active = false;
+    clearTimeout(pointer.holdTimer);
+    body.classList.remove("hints-on");
+    const dx = e.clientX - pointer.downX, dy = e.clientY - pointer.downY;
+    const dist = Math.hypot(dx, dy), dur = performance.now() - pointer.downT;
+    if (dist > 64 && dur < 650) {
+      const mode = dy < 0 ? (dx >= 0 ? "suggest" : "echo") : (dx >= 0 ? "scaffold" : "quiet");
+      setMode(mode, [dx / dist, dy / dist]);
+    } else if (dist < 14) {
+      ripples.push({ x: e.clientX, y: e.clientY, t: 0 });
+      if (ripples.length > 4) ripples.shift();
+    }
+  }
+  canvas.addEventListener("pointerup", pointerEnd);
+  canvas.addEventListener("pointercancel", () => {
+    pointer.active = false;
+    clearTimeout(pointer.holdTimer);
+    body.classList.remove("hints-on");
+  });
+
+  document.getElementById("speakBtn").addEventListener("click", () => {
+    if (state.typing) closeSheet();
+    state.listening ? stopListening() : startListening();
+  });
+  document.getElementById("typeBtn").addEventListener("click", () => {
+    if (state.listening) stopListening();
+    state.typing = true;
+    sheet.classList.add("open");
+    bar.classList.add("hidden");
+    setTimeout(() => sheetInput.focus(), 300);
+    updateDebug();
+  });
+  function closeSheet() {
+    state.typing = false;
+    sheet.classList.remove("open");
+    bar.classList.remove("hidden");
+    sheetInput.value = "";
+    sheetInput.blur();
+    updateDebug();
+  }
+  sheetInput.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === "Escape") closeSheet(); });
+  sheetInput.addEventListener("blur", () => { if (state.typing) setTimeout(closeSheet, 120); });
+
+  const skinBtns = document.querySelectorAll("#skins button");
+  function applySkin(name) {
+    skin = SKINS[name];
+    const r = document.documentElement.style;
+    r.setProperty("--bg", skin.bg);
+    r.setProperty("--text", skin.text);
+    r.setProperty("--text-soft", skin.soft);
+    r.setProperty("--text-faint", skin.faint);
+    r.setProperty("--glass-fill", skin.glass);
+    r.setProperty("--glass-stroke", skin.stroke);
+    r.setProperty("--glow", skin.glow);
+    skinBtns.forEach((b) => b.classList.toggle("active", b.dataset.skin === name));
+  }
+  skinBtns.forEach((b) => b.addEventListener("click", () => applySkin(b.dataset.skin)));
+
+  function placeHints() {
+    const pos = [
+      ["h-echo", 0.26, 0.24], ["h-suggest", 0.74, 0.24],
+      ["h-quiet", 0.26, 0.76], ["h-scaffold", 0.74, 0.76],
+    ];
+    for (const [id, fx, fy] of pos) {
+      const el = document.getElementById(id);
+      el.style.left = fx * W + "px";
+      el.style.top = fy * H + "px";
+    }
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const t = now / 1000;
+    if (state.listening) {
+      sampleLevel(dt);
+      waveHead = (waveHead + 1) % WAVE_N;
+      waveHist[waveHead] = level;
+    }
+
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      ripples[i].t += dt;
+      if (ripples[i].t > 1.1) ripples.splice(i, 1);
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = `rgb(${skin.dot[0]},${skin.dot[1]},${skin.dot[2]})`;
+
+    const halfW = W / 2, halfH = H / 2;
+    const spring = 42, damp = Math.exp(-6.5 * dt);
+    const quiet = state.mode === "quiet" && !state.listening;
+
+    for (const d of dots) {
+      const f = targetFor(d, t);
+      const tx = f[0] * halfW + halfW - d.hx;
+      const ty = f[1] * halfH + halfH - d.hy;
+      let sizeT = f[2], alphaW = f[3];
+
+      if (pointer.active) {
+        const pdx = d.hx + d.ax - pointer.x, pdy = d.hy + d.ay - pointer.y;
+        const pd = Math.hypot(pdx, pdy);
+        if (pd < 120) {
+          const g = 1 - pd / 120;
+          sizeT += 1.25 * g * g;
+        }
+      }
+      for (const rp of ripples) {
+        const rd = Math.hypot(d.hx + d.ax - rp.x, d.hy + d.ay - rp.y);
+        const ring = rp.t * 420;
+        const band = Math.abs(rd - ring);
+        if (band < 60) sizeT += (1 - band / 60) * 1.15 * (1 - rp.t / 1.1);
+      }
+
+      d.vx += (tx - d.ax) * spring * dt;
+      d.vy += (ty - d.ay) * spring * dt;
+      d.vx *= damp; d.vy *= damp;
+      d.ax += d.vx * dt * (quiet ? 0.55 : 1);
+      d.ay += d.vy * dt * (quiet ? 0.55 : 1);
+
+      d.s += (sizeT - d.s) * Math.min(1, 9 * dt);
+
+      const radius = Math.min(cell * 0.58, Math.max(0.4, cell * 0.3 * d.s));
+      const alpha = Math.min(0.88, skin.baseAlpha * alphaW * (0.35 + 0.65 * Math.min(1.4, d.s)));
+      if (alpha < 0.02 || radius < 0.45) continue;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(d.hx + d.ax, d.hy + d.ay, radius, 0, 6.2832);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("resize", () => { buildGrid(); placeHints(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && state.listening) stopListening();
+  });
+
+  buildGrid();
+  placeHints();
+  applySkin("orange");
+  showStance();
+  updateDebug();
+  body.classList.add("hints-on");
+  setTimeout(() => body.classList.remove("hints-on"), 3600);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
